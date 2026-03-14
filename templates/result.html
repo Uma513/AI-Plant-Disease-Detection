@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result – PlantCare AI</title>
+  <meta name="description" content="AI plant disease detection result with treatment and prevention advice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🌿</span>
+      <span class="brand-text">PlantCare <span class="accent">AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+      <li><a href="{{ url_for('upload') }}" class="nav-link active">Detect</a></li>
+      <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+    </ul>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1 class="page-title">🌿 {{ label['Diagnosis Result'] }}</h1>
+      <p class="page-subtitle">{{ label['AI analysis complete — review your detailed plant health report below'] }}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container result-container">
+
+      <!-- ── Language Switcher (GET-based, no re-upload required) ── -->
+      <div class="lang-switcher">
+        <span>🌍 {{ label['Change Language'] }}:</span>
+        <select id="lang-select" class="form-select select-sm" onchange="switchLang(this.value)">
+          <option value="en" {% if lang=='en' %}selected{% endif %}>🇬🇧 English</option>
+          <option value="hi" {% if lang=='hi' %}selected{% endif %}>🇮🇳 Hindi</option>
+          <option value="te" {% if lang=='te' %}selected{% endif %}>🇮🇳 Telugu</option>
+          <option value="ta" {% if lang=='ta' %}selected{% endif %}>🇮🇳 Tamil</option>
+          <option value="kn" {% if lang=='kn' %}selected{% endif %}>🇮🇳 Kannada</option>
+          <option value="ml" {% if lang=='ml' %}selected{% endif %}>🇮🇳 Malayalam</option>
+          <option value="mr" {% if lang=='mr' %}selected{% endif %}>🇮🇳 Marathi</option>
+          <option value="bn" {% if lang=='bn' %}selected{% endif %}>🇮🇳 Bengali</option>
+          <option value="gu" {% if lang=='gu' %}selected{% endif %}>🇮🇳 Gujarati</option>
+          <option value="es" {% if lang=='es' %}selected{% endif %}>🇪🇸 Spanish</option>
+        </select>
+      </div>
+
+      <!-- Demo mode banner -->
+      {% if is_demo %}
+      <div class="alert alert-warning">
+        ⚠️ Running in demo mode — no trained model found. Train the model first to get real predictions.
+      </div>
+      {% endif %}
+
+      <!-- Low confidence warning -->
+      {% if low_confidence %}
+      <div class="alert alert-warning">
+        ⚠️ {{ label['Please upload a clearer image for accurate diagnosis.'] }}
+      </div>
+      {% endif %}
+
+      <!-- ── Main result grid ── -->
+      <div class="result-grid">
+
+        <!-- LEFT: Image + Confidence -->
+        <div class="result-left">
+          <div class="glass-card image-card">
+            <img src="{{ url_for('uploaded_file', filename=image_filename) }}" alt="Uploaded plant leaf"
+              class="result-image" />
+            <div class="image-overlay">
+              <div class="confidence-ring">
+                <svg viewBox="0 0 100 100" class="ring-svg">
+                  <circle cx="50" cy="50" r="42" class="ring-bg" />
+                  <circle cx="50" cy="50" r="42" class="ring-fill" id="ring-fill" style="stroke-dasharray:0 263.9" />
+                </svg>
+                <div class="ring-label">
+                  <span class="ring-pct">{{ confidence }}%</span>
+                  <span class="ring-txt">{{ label['Confidence'] }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top 3 predictions -->
+          <div class="glass-card top3-card">
+            <h4>📊 {{ label['Top Predictions'] }}</h4>
+            {% for item in top3 %}
+            <div class="top3-row">
+              <span class="top3-label">{{ item.label }}</span>
+              <div class="top3-bar-wrap">
+                <div class="top3-bar" data-prob="{{ item.prob }}" style="width:0%"></div>
+              </div>
+              <span class="top3-pct">{{ item.prob }}%</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Voice section -->
+          <div class="glass-card voice-card" id="voice-section">
+            <h4>🔊 {{ label['Voice Diagnosis'] }}</h4>
+            <div id="voice-controls">
+              {% if audio_url %}
+              <!-- Server-generated gTTS audio -->
+              <audio controls src="{{ audio_url }}" class="audio-player" id="gtts-player">
+                Your browser does not support audio playback.
+              </audio>
+              {% endif %}
+              <!-- Browser Web Speech API button (always available) -->
+              <button class="btn btn-outline btn-sm" id="speak-btn" onclick="speakDiagnosis()">
+                🔊 {{ label['Read Aloud (Browser)'] }}
+              </button>
+              <button class="btn btn-outline btn-sm" id="stop-btn" onclick="stopSpeech()"
+                style="display:none; background:rgba(239,68,68,.1); border-color:#ef4444; color:#ef4444">
+                ⏹ {{ label['Stop'] }}
+              </button>
+            </div>
+          </div>
+
+          <!-- New scan btn -->
+          <a href="{{ url_for('upload') }}" class="btn btn-outline btn-block">
+            📷 {{ label['Scan Another Plant'] }}
+          </a>
+        </div>
+
+        <!-- RIGHT: Disease Info -->
+        <div class="result-right">
+
+          <!-- Disease name + severity badge -->
+          <div class="glass-card disease-header">
+            <div class="disease-title-row">
+              <div>
+                <p class="disease-detected-label">{{ label['Disease Detected'] }}</p>
+                <h2 class="disease-name">{{ disease_name_translated or disease_name }}</h2>
+                {% if disease_name_translated and disease_name_translated != disease_name %}
+                <p class="disease-name-en">({{ disease_name }})</p>
+                {% endif %}
+              </div>
+              <div class="severity-badge"
+                style="background:{{ severity_color }}20; border-color:{{ severity_color }}; color:{{ severity_color }}">
+                <strong>{{ label.get('Severity', 'Severity') }}</strong>
+                <span>
+                  {% if severity == 'Low' %}{{ label.get('Low', severity) }}
+                  {% elif severity == 'Medium' %}{{ label.get('Medium', severity) }}
+                  {% else %}{{ label.get('High', severity) }}
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Symptoms -->
+          <div class="glass-card info-card">
+            <div class="info-header">
+              <span class="info-icon">🔬</span>
+              <h3>{{ label['Symptoms'] }}</h3>
+            </div>
+            <p>{{ symptoms }}</p>
+          </div>
+
+          <!-- Crop Damage -->
+          <div class="glass-card info-card">
+            <div class="info-header">
+              <span class="info-icon">⚠️</span>
+              <h3>{{ label['Crop Damage'] }}</h3>
+            </div>
+            <p>{{ damage }}</p>
+          </div>
+
+          <!-- Treatment -->
+          <div class="glass-card info-card treatment-card">
+            <div class="info-header">
+              <span class="info-icon">💊</span>
+              <h3>{{ label['Treatment'] }}</h3>
+            </div>
+            <ul class="treatment-list">
+              {% for step in treatment %}
+              <li><span class="step-bullet">•</span> {{ step }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Prevention -->
+          <div class="glass-card info-card">
+            <div class="info-header">
+              <span class="info-icon">🛡️</span>
+              <h3>{{ label['Prevention'] }}</h3>
+            </div>
+            <p>{{ prevention }}</p>
+          </div>
+
+        </div>
+      </div><!-- /result-grid -->
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="brand-text">🌿 PlantCare <span class="accent">AI</span></span>
+      <p class="footer-copy">© 2024 PlantCare AI &nbsp;|&nbsp; Powered by sridhar-code stroms</p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- Embedded data for JavaScript                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <script>
+    // Data injected from Flask
+    const RESULT = {
+      filename: {{ image_filename | tojson }},
+      confidence: {{ confidence }},
+      diseaseName: {{ disease_name_translated | tojson }},
+      severity: {{ severity | tojson }},
+      symptoms: {{ symptoms | tojson }},
+      damage: {{ damage | tojson }},
+      treatment: {{ treatment | tojson }},
+      prevention: {{ prevention | tojson }},
+      lang: {{ lang | tojson }},
+      labels: {{ label | tojson }}
+    };
+
+    // ── 1. Language switcher (GET-based, no re-upload) ───────────────────────────
+    function switchLang(lang) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", lang);
+      window.location.href = url.toString();
+    }
+
+    // ── 2. Confidence ring animation ─────────────────────────────────────────────
+    window.addEventListener("DOMContentLoaded", () => {
+      const ring = document.getElementById("ring-fill");
+      const target = {{ (confidence / 100 * 263.9) | round(1) }};
+    // Start from 0, then animate to target after a short delay
+    if (ring) {
+      setTimeout(() => {
+        ring.style.transition = "stroke-dasharray 1.4s cubic-bezier(.4,0,.2,1)";
+        ring.style.strokeDasharray = target + " 263.9";
+      }, 150);
+    }
+
+    // Animate top-3 bars
+    document.querySelectorAll(".top3-bar").forEach(bar => {
+      const prob = parseFloat(bar.dataset.prob) || 0;
+      setTimeout(() => {
+        bar.style.transition = "width 1s ease";
+        bar.style.width = prob + "%";
+      }, 300);
+    });
+});
+
+    // ── 3. Web Speech API voice ───────────────────────────────────────────────────
+    const LANG_VOICES = { 
+      en: "en-US", te: "te-IN", hi: "hi-IN", 
+      ta: "ta-IN", kn: "kn-IN", ml: "ml-IN", 
+      mr: "mr-IN", bn: "bn-IN", gu: "gu-IN", es: "es-ES" 
+    };
+
+    function buildSpeechText() {
+      const labels = RESULT.labels;
+      const t = `${labels['Disease Detected']}: ${RESULT.diseaseName}. 
+    ${labels['Confidence']}: ${RESULT.confidence} percent. 
+    ${labels['Severity']}: ${RESULT.labels[RESULT.severity] || RESULT.severity}. 
+    ${labels['Symptoms']}: ${RESULT.symptoms}. 
+    ${labels['Crop Damage']}: ${RESULT.damage}. 
+    ${labels['Treatment']}: ${RESULT.treatment.join('. ')}.
+    ${labels['Prevention']}: ${RESULT.prevention}.`;
+      return t;
+    }
+
+    function speakDiagnosis() {
+      if (!window.speechSynthesis) {
+        alert("Your browser does not support text-to-speech.");
+        return;
+      }
+      stopSpeech();
+      const utter = new SpeechSynthesisUtterance(buildSpeechText());
+      utter.lang = LANG_VOICES[RESULT.lang] || "en-US";
+      utter.rate = 0.9;
+      utter.pitch = 1;
+      // Try to pick a matching voice
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.lang.startsWith(utter.lang.split("-")[0]));
+      if (match) utter.voice = match;
+
+      utter.onstart = () => {
+        document.getElementById("speak-btn").style.display = "none";
+        document.getElementById("stop-btn").style.display = "inline-flex";
+      };
+      utter.onend = resetVoiceButtons;
+      utter.onerror = resetVoiceButtons;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function stopSpeech() {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      resetVoiceButtons();
+    }
+
+    function resetVoiceButtons() {
+      document.getElementById("speak-btn").style.display = "inline-flex";
+      document.getElementById("stop-btn").style.display = "none";
+    }
+  </script>
+
+</body>
+
+</html>

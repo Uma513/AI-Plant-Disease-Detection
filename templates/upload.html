@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detect Disease – PlantCare AI</title>
+  <meta name="description" content="Upload a plant leaf image for instant AI-powered disease detection." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🌿</span>
+      <span class="brand-text">PlantCare <span class="accent">AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+      <li><a href="{{ url_for('upload') }}" class="nav-link active">Detect</a></li>
+      <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+    </ul>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1 class="page-title">🔍 Scan Your <span class="gradient-text">Plant Leaf</span></h1>
+      <p class="page-subtitle">Upload a clear photo of an affected leaf to get an instant AI diagnosis</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container upload-container">
+
+      {% if error %}
+      <div class="alert alert-error">⚠️ {{ error }}</div>
+      {% endif %}
+
+      <form id="upload-form" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-zone-content">
+            <div class="drop-icon" style="font-size: 3rem; margin-bottom: 0.5rem;">📸</div>
+            <h3>Take a Photo or Browse Files</h3>
+            <p class="file-hint">Supports PNG, JPG, JPEG (max 16 MB)</p>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-sm"
+                onclick="event.preventDefault(); event.stopPropagation(); openCamera();">
+                📷 Take Photo (Live)
+              </button>
+              <button type="button" class="btn btn-outline btn-sm"
+                onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('file-input').click();">
+                📁 Browse Gallery
+              </button>
+            </div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" class="file-input" />
+          <!-- Hidden camera input synced via JS -->
+          <input type="file" id="camera-input" accept="image/*" capture="environment"
+            style="opacity: 0; position: absolute; z-index: -1; width: 0.1px; height: 0.1px;" />
+          <div class="preview-wrapper" id="preview-wrapper" style="display:none;">
+            <img id="preview-img" src="" alt="Preview" />
+            <button type="button" class="remove-btn" id="remove-btn" title="Remove image">✕</button>
+          </div>
+        </div>
+
+        <!-- Language selector -->
+        <div class="form-group">
+          <label for="lang" class="form-label">🌍 Result Language</label>
+          <select name="lang" id="lang" class="form-select">
+            <option value="en">🇬🇧 English</option>
+            <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+            <option value="te">🇮🇳 Telugu (తెలుగు)</option>
+            <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
+            <option value="kn">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+            <option value="ml">🇮🇳 Malayalam (മലയാളം)</option>
+            <option value="mr">🇮🇳 Marathi (मराठी)</option>
+            <option value="bn">🇮🇳 Bengali (বাংলা)</option>
+            <option value="gu">🇮🇳 Gujarati (ગુજરાતી)</option>
+            <option value="es">🇪🇸 Spanish (Español)</option>
+          </select>
+        </div>
+
+        <!-- Tips -->
+        <div class="tips-box">
+          <h4>📸 Tips for Best Results</h4>
+          <ul>
+            <li>Use good lighting — avoid dark or blurry photos.</li>
+            <li>Photograph a single leaf flat against a plain background.</li>
+            <li>Ensure the full leaf is visible in the frame.</li>
+            <li>Take the photo from directly above the leaf.</li>
+          </ul>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary btn-xl btn-block" id="submit-btn" disabled>
+          <span id="btn-text">🔍 Analyse Plant</span>
+          <span id="btn-spinner" style="display:none;">⏳ Analysing…</span>
+        </button>
+
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="brand-text">🌿 PlantCare <span class="accent">AI</span></span>
+      <p class="footer-copy">© 2024 PlantCare AI &nbsp;|&nbsp; Powered by sridhar-code stroms</p>
+    </div>
+  </footer>
+  
+  <!-- Live Camera Modal -->
+  <div id="camera-modal" class="camera-modal">
+    <div class="camera-container">
+      <video id="camera-stream" autoplay playsinline></video>
+      <div class="camera-overlay">
+        <div class="scanner-box"></div>
+      </div>
+      <button type="button" class="remove-btn close-camera" onclick="closeCamera()">✕</button>
+      <div class="camera-controls">
+        <button type="button" class="camera-action-btn" onclick="switchCamera()" title="Switch Camera">🔄</button>
+        <button type="button" class="capture-btn" onclick="capturePhoto()" title="Capture Photo"></button>
+        <div style="width: 48px;"></div> <!-- Spacer -->
+      </div>
+    </div>
+    <canvas id="capture-canvas" style="display:none;"></canvas>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const cameraInput = document.getElementById("camera-input");
+    const preview = document.getElementById("preview-img");
+    const previewWrap = document.getElementById("preview-wrapper");
+    const dropContent = dropZone.querySelector(".drop-zone-content");
+    const removeBtn = document.getElementById("remove-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const form = document.getElementById("upload-form");
+    const btnText = document.getElementById("btn-text");
+    const btnSpinner = document.getElementById("btn-spinner");
+
+    function showPreview(file) {
+      if (!file || !file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        previewWrap.style.display = "flex";
+        dropContent.style.display = "none";
+        submitBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearPreview() {
+      preview.src = "";
+      previewWrap.style.display = "none";
+      dropContent.style.display = "flex";
+      fileInput.value = "";
+      cameraInput.value = "";
+      fileInput.name = "";
+      cameraInput.name = "";
+      submitBtn.disabled = true;
+    }
+
+    // Click to open file dialog (unless clicking a button)
+    dropZone.addEventListener("click", e => {
+      if (e.target !== removeBtn && e.target.tagName !== "BUTTON") fileInput.click();
+    });
+
+    // File selected from Browse
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileInput.name = "file";
+        cameraInput.name = "";
+        showPreview(fileInput.files[0]);
+      }
+    });
+
+    // File selected from Camera
+    cameraInput.addEventListener("change", () => {
+      if (cameraInput.files.length > 0) {
+        cameraInput.name = "file";
+        fileInput.name = "";
+        showPreview(cameraInput.files[0]);
+      }
+    });
+
+    // Drag & Drop
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      showPreview(file);
+    });
+
+    // Remove
+    removeBtn.addEventListener("click", e => { e.stopPropagation(); clearPreview(); });
+
+    // Spinner on submit
+    form.addEventListener("submit", (e) => {
+      // Check if we have a file or if we're submitting the captured blob
+      if (!fileInput.files.length && !cameraInput.files.length) {
+        e.preventDefault();
+        alert("Please select or capture a plant image first.");
+        return;
+      }
+      btnText.style.display = "none";
+      btnSpinner.style.display = "inline";
+      submitBtn.disabled = true;
+    });
+
+    // --- WebRTC Camera Logic ---
+    let stream = null;
+    let currentFacingMode = "environment";
+    const cameraModal = document.getElementById("camera-modal");
+    const video = document.getElementById("camera-stream");
+    const canvas = document.getElementById("capture-canvas");
+
+    async function openCamera() {
+      cameraModal.style.display = "flex";
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode },
+          audio: false
+        });
+        video.srcObject = stream;
+      } catch (err) {
+        console.error("Camera error:", err);
+        alert("Unable to access camera. Please check permissions.");
+        closeCamera();
+      }
+    }
+
+    function closeCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      cameraModal.style.display = "none";
+      video.srcObject = null;
+    }
+
+    async function switchCamera() {
+      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      closeCamera();
+      openCamera();
+    }
+
+    function capturePhoto() {
+      const context = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(blob => {
+        const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        
+        // Use cameraInput to store the file
+        cameraInput.files = dt.files;
+        cameraInput.name = "file";
+        fileInput.name = "";
+        
+        showPreview(file);
+        closeCamera();
+      }, "image/jpeg", 0.95);
+    }
+  </script>
+</body>
+
+</html>

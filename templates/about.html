@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About – PlantCare AI</title>
+  <meta name="description"
+    content="Learn how PlantCare AI uses MobileNetV2 deep learning to detect plant diseases from leaf images." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🌿</span>
+      <span class="brand-text">PlantCare <span class="accent">AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+      <li><a href="{{ url_for('upload') }}" class="nav-link">Detect</a></li>
+      <li><a href="{{ url_for('about') }}" class="nav-link active">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Hero -->
+  <section class="page-hero">
+    <div class="container">
+      <h1 class="page-title">About <span class="gradient-text">PlantCare AI</span></h1>
+      <p class="page-subtitle">Smart crop diagnostics powered by deep learning</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- Mission -->
+      <div class="about-card glass-card">
+        <div class="about-icon">🎯</div>
+        <div>
+          <h2>Our Mission</h2>
+          <p>
+            Millions of small-scale farmers lose crops each year to preventable plant diseases.
+            PlantCare AI brings state-of-the-art computer vision directly to smartphones,
+            enabling instant, accurate diagnosis without needing an agronomist on-site.
+          </p>
+        </div>
+      </div>
+
+      <!-- Model Architecture -->
+      <div class="about-card glass-card">
+        <div class="about-icon">🧠</div>
+        <div>
+          <h2>Model Architecture</h2>
+          <p>We use <strong>MobileNetV2</strong> pretrained on ImageNet as a feature extractor combined with a custom
+            classification head:</p>
+          <div class="arch-diagram">
+            <div class="arch-layer">Input 224×224 RGB</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer highlight">MobileNetV2 (frozen backbone)</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer">Global Average Pooling 2D</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer">Dropout 0.3</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer">Dense 256 (ReLU)</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer">Dropout 0.2</div>
+            <div class="arch-arrow">↓</div>
+            <div class="arch-layer highlight">Dense 38 (Softmax)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Details -->
+      <div class="about-card glass-card">
+        <div class="about-icon">📈</div>
+        <div>
+          <h2>Training Details</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-val">87,000+</span>
+              <span class="stat-lbl">Training Images</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">38</span>
+              <span class="stat-lbl">Disease Classes</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">95 %+</span>
+              <span class="stat-lbl">Validation Accuracy</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">Adam</span>
+              <span class="stat-lbl">Optimizer (LR 1e-4)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">224×224</span>
+              <span class="stat-lbl">Input Resolution</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">
+                < 2 s</span>
+                  <span class="stat-lbl">Prediction Time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dataset -->
+      <div class="about-card glass-card">
+        <div class="about-icon">📚</div>
+        <div>
+          <h2>Dataset</h2>
+          <p>
+            Trained on the <strong>PlantVillage / New Plant Diseases Dataset</strong> — a curated,
+            publicly available collection of over 87,000 leaf images spanning 14 crop species
+            and 38 classes (healthy + diseased).
+          </p>
+          <p style="margin-top:0.75rem;">
+            Data augmentation during training included random rotations, flips, zoom, brightness
+            variations, and shear transforms to ensure robustness to field conditions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Technology Stack -->
+      <div class="about-card glass-card">
+        <div class="about-icon">⚙️</div>
+        <div>
+          <h2>Technology Stack</h2>
+          <div class="tech-tags">
+            <span class="tech-tag">🐍 Python 3.10+</span>
+            <span class="tech-tag">🧠 TensorFlow / Keras</span>
+            <span class="tech-tag">📱 MobileNetV2</span>
+            <span class="tech-tag">🌶 Flask</span>
+            <span class="tech-tag">👁️ OpenCV</span>
+            <span class="tech-tag">🔊 gTTS</span>
+            <span class="tech-tag">🎨 Vanilla CSS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center" style="margin-top:3rem;">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg pulse-btn">
+          🌿 Try It Now
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="brand-text">🌿 PlantCare <span class="accent">AI</span></span>
+      <p>Empowering farmers with AI-driven crop health insights.</p>
+      <p class="footer-copy">© 2024 PlantCare AI &nbsp;|&nbsp; Powered by sridhar-code stroms</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>

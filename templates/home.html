@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlantCare AI – Smart Plant Disease Detection</title>
+  <meta name="description"
+    content="AI-powered plant disease detection for farmers. Upload a leaf photo and get instant diagnosis, treatment and prevention advice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+  <!-- ── NAV ──────────────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🌿</span>
+      <span class="brand-text">PlantCare <span class="accent">AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}" class="nav-link active">Home</a></li>
+      <li><a href="{{ url_for('upload') }}" class="nav-link">Detect</a></li>
+      <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="particles"></div>
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        AI-Powered Plant Diagnosis
+      </div>
+      <h1 class="hero-title">
+        Protect Your Crops<br />
+        <span class="gradient-text">Before They Fall Ill</span>
+      </h1>
+      <p class="hero-subtitle">
+        Upload a photo of your plant leaf and our AI instantly identifies diseases,
+        suggests treatments, and helps you save your harvest.
+      </p>
+      <div class="hero-actions">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg pulse-btn">
+          <span>🔍</span> Scan My Plant
+        </a>
+        <a href="{{ url_for('about') }}" class="btn btn-outline btn-lg">
+          <span>ℹ️</span> Learn More
+        </a>
+      </div>
+      <p class="hero-note">✅ 38 disease classes &nbsp;•&nbsp; 95 %+ accuracy &nbsp;•&nbsp; Instant results</p>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ──────────────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">Three simple steps to diagnose your plant</p>
+      <div class="steps-grid">
+        <div class="step-card" style="--i:0">
+          <div class="step-number">01</div>
+          <div class="step-icon">📸</div>
+          <h3>Upload a Photo</h3>
+          <p>Take a clear photo of the affected leaf and upload it to our system.</p>
+        </div>
+        <div class="step-card" style="--i:1">
+          <div class="step-number">02</div>
+          <div class="step-icon">🤖</div>
+          <h3>AI Analysis</h3>
+          <p>Our MobileNetV2 model analyses the image in under 2 seconds.</p>
+        </div>
+        <div class="step-card" style="--i:2">
+          <div class="step-number">03</div>
+          <div class="step-icon">💊</div>
+          <h3>Get Treatment</h3>
+          <p>Receive a full diagnosis with treatment steps in your language.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ──────────────────────────────────────────────────────────── -->
+  <section class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Built for Farmers</h2>
+      <p class="section-sub">Every feature designed for practical field use</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3>Multi-Language</h3>
+          <p>Results in English, Telugu, and Hindi so every farmer understands.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎙️</div>
+          <h3>Voice Output</h3>
+          <p>Listen to the diagnosis with text-to-speech, even without reading.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Confidence Score</h3>
+          <p>Know how certain the AI is about each prediction.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚦</div>
+          <h3>Severity Rating</h3>
+          <p>Understand urgency with Low / Medium / High damage indicators.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💡</div>
+          <h3>Treatment Steps</h3>
+          <p>Practical, actionable advice on fungicides, pesticides & remedies.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Mobile Friendly</h3>
+          <p>Works perfectly on smartphones right from the field.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SUPPORTED CROPS ────────────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Supported Crops</h2>
+      <p class="section-sub">Covering 14 crop types and 38 disease conditions</p>
+      <div class="crops-strip">
+        {% for crop in ["🍎 Apple","🫐 Blueberry","🍒 Cherry","🌽 Corn","🍇 Grape","🍊 Orange","🍑 Peach","🫑
+        Pepper","🥔 Potato","🫐 Raspberry","🌱 Soybean","🎃 Squash","🍓 Strawberry","🍅 Tomato"] %}
+        <div class="crop-tag">{{ crop }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────────────────────────────────── -->
+  <section class="cta-section">
+    <div class="container cta-inner">
+      <h2>Ready to protect your harvest?</h2>
+      <p>Instant disease detection — free, fast, and farmer-friendly.</p>
+      <a href="{{ url_for('upload') }}" class="btn btn-primary btn-xl pulse-btn">
+        🌿 Diagnose Now
+      </a>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="brand-text">🌿 PlantCare <span class="accent">AI</span></span>
+      <p>Empowering farmers with AI-driven crop health insights.</p>
+      <p class="footer-copy">© 2024 PlantCare AI &nbsp;|&nbsp; Powered by sridhar-code stroms</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple floating particle effect
+    const canvas = document.createElement("canvas");
+    const hero = document.getElementById("particles");
+    if (hero) {
+      canvas.width = hero.offsetWidth;
+      canvas.height = hero.offsetHeight;
+      hero.appendChild(canvas);
+      const ctx = canvas.getContext("2d");
+      const dots = Array.from({ length: 60 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        a: Math.random() * 0.5 + 0.1,
+      }));
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        dots.forEach(d => {
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(134,239,172,${d.a})`;
+          ctx.fill();
+          d.x += d.dx; d.y += d.dy;
+          if (d.x < 0 || d.x > canvas.width) d.dx *= -1;
+          if (d.y < 0 || d.y > canvas.height) d.dy *= -1;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  </script>
+</body>
+
+</html>

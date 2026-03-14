@@ -1,0 +1,1 @@
+Error listing models: 'Model' object has no attribute 'supported_methods'
